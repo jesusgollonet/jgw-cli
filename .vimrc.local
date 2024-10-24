@@ -1,0 +1,1 @@
+map ,r :w\|!yarn tsx src/index.ts post list --all<cr>

@@ -43,7 +43,6 @@ export async function listPosts(includeDrafts: boolean = false) {
   const postsDirectory = `${config.path}/build/posts/`;
   let files = await parsePostsDirectory(postsDirectory);
   if (!includeDrafts) {
-    console.log("no drafts");
     files = files.filter((f) => f.draft == false);
   }
   files = files.sort((a, b) => {
@@ -52,7 +51,7 @@ export async function listPosts(includeDrafts: boolean = false) {
 
   const now = new Date();
   files.forEach(async (file) => {
-    const { title, date } = file;
+    const { title, date, draft } = file;
     const columnSize = 60;
     const relativeTimeFormat = new Intl.RelativeTimeFormat("en", {
       style: "long",
@@ -60,12 +59,14 @@ export async function listPosts(includeDrafts: boolean = false) {
     });
     const ellapsedTime = now.getTime() - new Date(date).getTime();
     const [value, unit] = getUnitAndValueFormat(ellapsedTime);
-    console.log(
-      title.padEnd(columnSize, " "),
-      relativeTimeFormat.format(
-        Math.floor((new Date(date).getTime() - now.getTime()) / value),
-        unit,
-      ),
+
+    const timeAgo = relativeTimeFormat.format(
+      Math.floor((new Date(date).getTime() - now.getTime()) / value),
+      unit,
     );
+    let postString = `${draft ? "\x1b[31m" : "\x1b[37m"}${title.padEnd(columnSize)}${timeAgo.padStart(16)}`;
+    console.log(postString);
   });
+  // reset color
+  console.log("\x1b[0m");
 }

@@ -30,15 +30,15 @@ yargs
         "list all posts",
         (yargs: Argv) => {
           yargs
-            .option("draft", {
+            .option("all", {
               type: "boolean",
               default: false,
               describe: "include drafts",
             })
-            .alias("d", "draft");
+            .alias("a", "all");
         },
         async function (argv) {
-          await listPosts(argv.draft as boolean);
+          await listPosts(argv.all as boolean);
         },
       )
       .demandCommand(1)
