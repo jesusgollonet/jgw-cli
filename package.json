@@ -5,6 +5,12 @@
   "bin": {
     "jgw": "./bin/index.js"
   },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir ./bin --target node",
+    "dev": "bun src/index.ts",
+    "compile": "bun build src/index.ts --compile --outfile jgw",
+    "install-global": "bun link --global"
+  },
   "license": "MIT",
   "dependencies": {
     "@inquirer/editor": "^1.2.13",

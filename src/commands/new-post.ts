@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
 import editor from "@inquirer/editor";
 import fs from "fs";

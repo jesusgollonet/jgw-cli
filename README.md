@@ -6,19 +6,29 @@ A cli utility to interact with my blog/website. It allows to create, list, ~~del
 
 ### Development
 
-It's developed using [TypeScript](https://www.typescriptlang.org) and [Node.js](https://nodejs.org).
+It's developed using [TypeScript](https://www.typescriptlang.org) and [Bun](https://bun.sh).
+
+Install dependencies:
+```
+bun install
+```
 
 In order to be able to call the jgw command globally, you need to link it from
 the global scope
 
 ```
-yarn link --global
+bun run install-global
 ```
 
-When developing, it's convenient to start tsc in watch mode
+When developing, you can run TypeScript directly without compilation:
 
 ```
-yarn tsc --watch
+bun run dev
+```
+
+Or execute the TypeScript file directly:
+```
+./src/index.ts
 ```
 
 
