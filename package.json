@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@inquirer/confirm": "^5.1.13",
     "@inquirer/editor": "^1.2.13",
     "@types/node": "^20.10.0",
     "@types/yargs": "^17.0.32",
