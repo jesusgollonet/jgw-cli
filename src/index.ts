@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
-import yargs, { Argv } from "yargs";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import { Argv } from "yargs";
 import { openEditor } from "./commands/new-post";
 import { listPosts } from "./commands/list-posts";
 
-yargs
+yargs(hideBin(process.argv))
   .scriptName("jgw")
   .usage("Usage: $0 <command> [options]")
   .command("post", "jgw post <subcommand>", (yargs: Argv) => {
