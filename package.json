@@ -9,7 +9,10 @@
     "build": "bun build src/index.ts --outdir ./bin --target node",
     "dev": "bun src/index.ts",
     "compile": "bun build src/index.ts --compile --outfile jgw",
-    "install-global": "bun link --global"
+    "install-global": "bun link --global",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui"
   },
   "license": "MIT",
   "dependencies": {
@@ -23,5 +26,9 @@
     "tsx": "^4.19.1",
     "typescript": "^5.3.2",
     "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@vitest/ui": "^3.2.4",
+    "vitest": "^3.2.4"
   }
 }
