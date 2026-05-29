@@ -25,22 +25,22 @@ export const openEditor = async (postTitle?: string) => {
   const parsedPost = matter(postContent);
   // TODO: validate post
   const { title, date } = parsedPost.data;
-  
+
   // Handle undefined title and date
   const actualTitle = title || "untitled";
   const actualDate = date || new Date().toISOString();
-  
+
   // Prompt user to save or discard
   const shouldSave = await confirm({
     message: `Save post "${actualTitle}"?`,
     default: true,
   });
-  
+
   if (!shouldSave) {
     console.log("Post discarded.");
     return;
   }
-  
+
   // remove special chars from title. replace spaces with hyphens
   // if there are multiple spaces, replace with single hyphen
   const fileTitle = actualTitle

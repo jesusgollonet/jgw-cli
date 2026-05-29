@@ -11,12 +11,18 @@ export interface PostFile {
   draft: boolean;
 }
 
+export interface PostWithContent extends PostFile {
+  content: string;
+  filePath: string;
+}
+
 const parsePostsDirectory = async (
   postsDirectory: string,
 ): Promise<PostFile[]> => {
   const fileList = await readdir(postsDirectory);
-  const postsData = [];
-  for await (let fileName of fileList) {
+  const postsData: PostFile[] = [];
+
+  for (const fileName of fileList) {
     const filePath = path.join(postsDirectory, fileName);
     const fileContents = await readFile(filePath);
     const postData = await parsePostFile(fileName, fileContents);
@@ -38,7 +44,9 @@ async function parsePostFile(
   };
 }
 
-export async function listPosts(includeDrafts: boolean = false) {
+export async function getPosts(
+  includeDrafts: boolean = false,
+): Promise<PostFile[]> {
   const config = await loadConfig();
   const postsDirectory = `${config.path}/build/posts/`;
   let files = await parsePostsDirectory(postsDirectory);
@@ -48,23 +56,58 @@ export async function listPosts(includeDrafts: boolean = false) {
   files = files.sort((a, b) => {
     return new Date(a.date) >= new Date(b.date) ? -1 : 1;
   });
+  return files;
+}
 
+export async function getPostByIndex(
+  index: number,
+  includeDrafts: boolean = false,
+): Promise<PostWithContent | null> {
+  const posts = await getPosts(includeDrafts);
+  if (index < 0 || index >= posts.length) {
+    return null;
+  }
+
+  const post = posts[index];
+  const config = await loadConfig();
+  const postsDirectory = `${config.path}/build/posts/`;
+  const filePath = path.join(postsDirectory, post.fileName);
+
+  try {
+    const content = await readFile(filePath, "utf-8");
+    return {
+      ...post,
+      content,
+      filePath,
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+function formatTimeAgo(date: string): string {
   const now = new Date();
-  files.forEach(async (file) => {
+  const relativeTimeFormat = new Intl.RelativeTimeFormat("en", {
+    style: "long",
+    numeric: "auto",
+  });
+  const elapsedTime = now.getTime() - new Date(date).getTime();
+  const [value, unit] = getUnitAndValueFormat(elapsedTime);
+
+  return relativeTimeFormat.format(
+    Math.floor((new Date(date).getTime() - now.getTime()) / value),
+    unit,
+  );
+}
+
+export async function listPosts(includeDrafts: boolean = false) {
+  const files = await getPosts(includeDrafts);
+
+  files.forEach((file) => {
     const { title, date, draft } = file;
     const columnSize = 60;
-    const relativeTimeFormat = new Intl.RelativeTimeFormat("en", {
-      style: "long",
-      numeric: "auto",
-    });
-    const ellapsedTime = now.getTime() - new Date(date).getTime();
-    const [value, unit] = getUnitAndValueFormat(ellapsedTime);
-
-    const timeAgo = relativeTimeFormat.format(
-      Math.floor((new Date(date).getTime() - now.getTime()) / value),
-      unit,
-    );
-    let postString = `${draft ? "\x1b[31m" : "\x1b[37m"}${title.padEnd(columnSize)}${timeAgo.padStart(16)}`;
+    const timeAgo = formatTimeAgo(date);
+    const postString = `${draft ? "\x1b[31m" : "\x1b[37m"}${title.padEnd(columnSize)}${timeAgo.padStart(16)}`;
     console.log(postString);
   });
   // reset color

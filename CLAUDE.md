@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a TypeScript CLI tool called "jgw" for managing blog posts. It provides commands to create new posts and list existing posts, with support for draft/published states.
+This is a TypeScript CLI tool called "jgw" for managing blog posts. It provides commands to create, list, and edit posts, with support for draft/published states.
 
 ## Development Commands
 
@@ -37,6 +37,12 @@ bun run dev post list
 
 # List all posts including drafts
 bun run dev post list --all
+
+# Edit an existing published post
+bun run dev post edit
+
+# Edit drafts too
+bun run dev post edit --all
 ```
 
 ## Architecture
@@ -46,6 +52,7 @@ bun run dev post list --all
 - `src/commands/` - Command implementations
   - `new-post.ts` - Creates new blog posts using interactive editor
   - `list-posts.ts` - Lists and displays existing posts
+  - `edit-post.ts` - Selects and edits existing posts using interactive prompts
 - `src/config.ts` - Configuration loading from `~/.jgbrc.json`
 - `src/lib/` - Utility functions
 

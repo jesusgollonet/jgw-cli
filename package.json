@@ -11,6 +11,7 @@
     "compile": "bun build src/index.ts --compile --outfile jgw",
     "install-global": "bun link --global",
     "test": "vitest",
+    "typecheck": "tsc --noEmit",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui"
   },
@@ -18,11 +19,11 @@
   "dependencies": {
     "@inquirer/confirm": "^5.1.13",
     "@inquirer/editor": "^1.2.13",
+    "@inquirer/select": "^4.2.4",
     "@types/node": "^20.10.0",
     "@types/yargs": "^17.0.32",
     "gray-matter": "^4.0.3",
     "ts-node": "^10.9.1",
-    "tsc": "^2.0.4",
     "tsx": "^4.19.1",
     "typescript": "^5.3.2",
     "yargs": "^17.7.2"

@@ -5,6 +5,7 @@ import { hideBin } from "yargs/helpers";
 import { Argv } from "yargs";
 import { openEditor } from "./commands/new-post";
 import { listPosts } from "./commands/list-posts";
+import { editPost } from "./commands/edit-post";
 
 yargs(hideBin(process.argv))
   .scriptName("jgw")
@@ -41,6 +42,22 @@ yargs(hideBin(process.argv))
         },
         async function (argv) {
           await listPosts(argv.all as boolean);
+        },
+      )
+      .command(
+        "edit",
+        "edit an existing post",
+        (yargs: Argv) => {
+          yargs
+            .option("all", {
+              type: "boolean",
+              default: false,
+              describe: "include drafts in selection",
+            })
+            .alias("a", "all");
+        },
+        async function (argv) {
+          await editPost(argv.all as boolean);
         },
       )
       .demandCommand(1)
