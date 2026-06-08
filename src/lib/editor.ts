@@ -81,3 +81,24 @@ export async function openInEditor(
     await rm(tempDirectory, { recursive: true, force: true });
   }
 }
+
+export async function openExistingFileInEditor(filePath: string): Promise<string> {
+  const editorCommand = process.env.VISUAL || process.env.EDITOR || "vim";
+  const [bin, ...args] = splitEditorCommand(editorCommand);
+  if (!bin) {
+    throw new Error("No editor command configured.");
+  }
+
+  const result = spawnSync(bin, [...args, filePath], { stdio: "inherit" });
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    throw new Error(`${bin} exited with status ${result.status}`);
+  }
+  if (result.signal) {
+    throw new Error(`${bin} exited from signal ${result.signal}`);
+  }
+
+  return await readFile(filePath, "utf8");
+}

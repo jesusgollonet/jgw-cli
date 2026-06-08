@@ -23,7 +23,37 @@ describe('config', () => {
       const config = await loadConfig()
 
       expect(fs.readFile).toHaveBeenCalledWith('/Users/test/.jgbrc.json', 'utf8')
-      expect(config).toEqual({ path: '/path/to/blog' })
+      expect(config).toEqual({
+        path: '/path/to/blog',
+        postsDirectory: 'build/posts',
+        server: undefined,
+        preview: undefined
+      })
+    })
+
+    it('should load optional post preview config', async () => {
+      const mockHomedir = '/Users/test'
+      const mockConfig = {
+        path: '/path/to/blog',
+        postsDirectory: 'content/posts',
+        server: {
+          command: 'pnpm run dev',
+          cwd: '/path/to/blog',
+          readyUrl: 'http://localhost:4321',
+          timeoutMs: 1000
+        },
+        preview: {
+          url: 'http://localhost:4321/posts/{slug}',
+          command: 'open {url}'
+        }
+      }
+
+      vi.mocked(homedir).mockReturnValue(mockHomedir)
+      vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify(mockConfig))
+
+      const config = await loadConfig()
+
+      expect(config).toEqual(mockConfig)
     })
 
     it('should handle config file read errors', async () => {

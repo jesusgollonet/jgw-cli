@@ -1,11 +1,12 @@
 #!/usr/bin/env bun
 
 import confirm from "@inquirer/confirm";
-import { writeFile } from "fs/promises";
+import { rm, writeFile } from "fs/promises";
 import matter from "gray-matter";
 import path from "path";
 import { loadConfig } from "../config";
-import { openInEditor } from "../lib/editor";
+import { openExistingFileInEditor } from "../lib/editor";
+import { openPostPreview } from "../lib/post-preview";
 
 const postMetadata = (postName: string, postDate: string) => {
   return `---
@@ -15,13 +16,38 @@ draft: true
 ---`;
 };
 
+const slugifyTitle = (title: string) =>
+  title
+    .replace(/[^a-zA-Z0-9\s]/g, "")
+    .replace(/\s+/g, "-")
+    .toLowerCase();
+
 export const openEditor = async (postTitle?: string) => {
   const config = await loadConfig();
-  const postsDirectory = `${config.path}/build/posts/`;
-  const postContent = await openInEditor(
-    postMetadata(postTitle || "untitled", new Date().toISOString()),
-    ".md",
+  const postsDirectory = path.join(
+    config.path,
+    config.postsDirectory ?? "build/posts",
   );
+
+  const initialTitle = postTitle || "untitled";
+  const initialDate = new Date().toISOString();
+  const fileTitle = slugifyTitle(initialTitle);
+  const fileDate = initialDate.split("T")[0];
+  const postFilename = `${fileDate}_${fileTitle}.md`;
+  const filePath = path.join(postsDirectory, postFilename);
+  await writeFile(filePath, postMetadata(initialTitle, initialDate), "utf8");
+  console.log("Draft post created at ", filePath);
+
+  void openPostPreview(config, {
+    title: initialTitle,
+    slug: fileTitle,
+    date: fileDate,
+    filePath,
+  }).catch((error) => {
+    console.warn(`Could not open post preview: ${error}`);
+  });
+
+  const postContent = await openExistingFileInEditor(filePath);
   const parsedPost = matter(postContent);
   // TODO: validate post
   const { title, date } = parsedPost.data;
@@ -37,23 +63,10 @@ export const openEditor = async (postTitle?: string) => {
   });
 
   if (!shouldSave) {
+    await rm(filePath, { force: true });
     console.log("Post discarded.");
     return;
   }
 
-  // remove special chars from title. replace spaces with hyphens
-  // if there are multiple spaces, replace with single hyphen
-  const fileTitle = actualTitle
-    .replace(/[^a-zA-Z0-9\s]/g, "")
-    .replace(/\s+/g, "-")
-    .toLowerCase();
-  const fileDate = actualDate.split("T")[0];
-  const postFilename = `${fileDate}_${fileTitle}.md`;
-  // check for defaults
-  // save post now
-  //
-  const filePath = path.join(postsDirectory, postFilename);
-  //TODO: check for name collision
-  await writeFile(filePath, postContent, "utf8");
   console.log("The post has been saved! as ", filePath);
 };

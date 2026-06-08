@@ -48,7 +48,10 @@ export async function getPosts(
   includeDrafts: boolean = false,
 ): Promise<PostFile[]> {
   const config = await loadConfig();
-  const postsDirectory = `${config.path}/build/posts/`;
+  const postsDirectory = path.join(
+    config.path,
+    config.postsDirectory ?? "build/posts",
+  );
   let files = await parsePostsDirectory(postsDirectory);
   if (!includeDrafts) {
     files = files.filter((f) => f.draft == false);
@@ -70,7 +73,10 @@ export async function getPostByIndex(
 
   const post = posts[index];
   const config = await loadConfig();
-  const postsDirectory = `${config.path}/build/posts/`;
+  const postsDirectory = path.join(
+    config.path,
+    config.postsDirectory ?? "build/posts",
+  );
   const filePath = path.join(postsDirectory, post.fileName);
 
   try {

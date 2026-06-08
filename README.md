@@ -10,7 +10,28 @@ A cli utility to interact with my blog/website. It allows you to create, list, a
 - List posts: `jgw post list` (use `--all`/`-a` to include drafts)
 - Edit a post: `jgw post edit` (use `--all`/`-a` to include drafts)
 
-Posts are read from and written to `${config.path}/build/posts/` where `config.path` comes from your config.
+Posts are read from and written to `${config.path}/${config.postsDirectory}` where `config.path` comes from your config. `postsDirectory` defaults to `build/posts`.
+
+Example config:
+
+```json
+{
+  "path": "/Users/you/Work/site",
+  "postsDirectory": "build/posts",
+  "server": {
+    "command": "pnpm run dev",
+    "cwd": "/Users/you/Work/site",
+    "readyUrl": "http://localhost:4321",
+    "timeoutMs": 15000
+  },
+  "preview": {
+    "url": "http://localhost:4321/posts/{slug}",
+    "command": "open {url}"
+  }
+}
+```
+
+The `server` and `preview` blocks are optional. Template values available in `preview.url` are `{title}`, `{slug}`, `{date}`, and `{filePath}`. `preview.command` also receives `{url}` after `preview.url` is rendered. The CLI starts the configured server in the background, waits for `readyUrl` when present, and then runs the preview command.
 
 ### Development
 
@@ -50,4 +71,3 @@ bun x vitest run
 ```
 
 Note: `bun test` (Bun’s built-in test runner) is not supported for this repo since the tests rely on Vitest APIs like `vi.mock` and `vitest.config.ts`.
-

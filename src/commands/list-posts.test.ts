@@ -41,7 +41,7 @@ describe('list-posts', () => {
       await listPosts()
 
       expect(loadConfig).toHaveBeenCalled()
-      expect(readdir).toHaveBeenCalledWith('/test/blog/build/posts/')
+      expect(readdir).toHaveBeenCalledWith('/test/blog/build/posts')
       expect(readFile).toHaveBeenCalledTimes(2)
       expect(console.log).toHaveBeenCalled()
     })
@@ -61,7 +61,7 @@ describe('list-posts', () => {
       await listPosts(true)
 
       expect(loadConfig).toHaveBeenCalled()
-      expect(readdir).toHaveBeenCalledWith('/test/blog/build/posts/')
+      expect(readdir).toHaveBeenCalledWith('/test/blog/build/posts')
       expect(readFile).toHaveBeenCalledTimes(1)
       expect(console.log).toHaveBeenCalled()
     })
@@ -85,7 +85,7 @@ describe('list-posts', () => {
       await listPosts()
 
       expect(loadConfig).toHaveBeenCalled()
-      expect(readdir).toHaveBeenCalledWith('/test/blog/build/posts/')
+      expect(readdir).toHaveBeenCalledWith('/test/blog/build/posts')
       expect(readFile).toHaveBeenCalledTimes(2)
       expect(console.log).toHaveBeenCalled()
     })
