@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { openEditor } from './new-post'
 import { loadConfig } from '../config'
-import editor from '@inquirer/editor'
+import { openInEditor } from '../lib/editor'
 import confirm from '@inquirer/confirm'
-import fs from 'fs'
+import { writeFile } from 'fs/promises'
 import matter from 'gray-matter'
 
 // Mock dependencies
 vi.mock('../config')
-vi.mock('@inquirer/editor')
+vi.mock('../lib/editor')
 vi.mock('@inquirer/confirm')
-vi.mock('fs')
+vi.mock('fs/promises')
 vi.mock('gray-matter')
 
 const mockMatterFile = (data: Record<string, unknown>, content = 'Content') =>
@@ -29,31 +29,28 @@ describe('new-post', () => {
       const mockPostContent = '---\ntitle: Test Post\ndate: 2023-01-01T00:00:00Z\ndraft: true\n---\nContent'
 
       vi.mocked(loadConfig).mockResolvedValue(mockConfig)
-      vi.mocked(editor).mockResolvedValue(mockPostContent)
+      vi.mocked(openInEditor).mockResolvedValue(mockPostContent)
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(matter).mockReturnValue(
         mockMatterFile({ title: 'Test Post', date: '2023-01-01T00:00:00Z', draft: true })
       )
-      vi.mocked(fs.writeFile).mockImplementation((path, content, callback) => {
-        callback(null)
-      })
+      vi.mocked(writeFile).mockResolvedValue()
 
       await openEditor('Test Post')
 
       expect(loadConfig).toHaveBeenCalled()
-      expect(editor).toHaveBeenCalledWith(expect.objectContaining({
-        message: 'Create a new post',
-        default: expect.stringContaining('Test Post'),
-        postfix: '.md'
-      }))
+      expect(openInEditor).toHaveBeenCalledWith(
+        expect.stringContaining('Test Post'),
+        '.md'
+      )
       expect(confirm).toHaveBeenCalledWith(expect.objectContaining({
         message: 'Save post "Test Post"?',
         default: true
       }))
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining('2023-01-01_test-post.md'),
         mockPostContent,
-        expect.any(Function)
+        'utf8'
       )
     })
 
@@ -62,7 +59,7 @@ describe('new-post', () => {
       const mockPostContent = '---\ntitle: Test Post\ndate: 2023-01-01T00:00:00Z\ndraft: true\n---\nContent'
 
       vi.mocked(loadConfig).mockResolvedValue(mockConfig)
-      vi.mocked(editor).mockResolvedValue(mockPostContent)
+      vi.mocked(openInEditor).mockResolvedValue(mockPostContent)
       vi.mocked(confirm).mockResolvedValue(false)
       vi.mocked(matter).mockReturnValue(
         mockMatterFile({ title: 'Test Post', date: '2023-01-01T00:00:00Z', draft: true })
@@ -71,12 +68,12 @@ describe('new-post', () => {
       await openEditor('Test Post')
 
       expect(loadConfig).toHaveBeenCalled()
-      expect(editor).toHaveBeenCalled()
+      expect(openInEditor).toHaveBeenCalled()
       expect(confirm).toHaveBeenCalledWith(expect.objectContaining({
         message: 'Save post "Test Post"?',
         default: true
       }))
-      expect(fs.writeFile).not.toHaveBeenCalled()
+      expect(writeFile).not.toHaveBeenCalled()
       expect(console.log).toHaveBeenCalledWith('Post discarded.')
     })
 
@@ -85,14 +82,12 @@ describe('new-post', () => {
       const mockPostContent = '---\ntitle: \ndate: 2023-01-01T00:00:00Z\ndraft: true\n---\nContent'
 
       vi.mocked(loadConfig).mockResolvedValue(mockConfig)
-      vi.mocked(editor).mockResolvedValue(mockPostContent)
+      vi.mocked(openInEditor).mockResolvedValue(mockPostContent)
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(matter).mockReturnValue(
         mockMatterFile({ title: undefined, date: '2023-01-01T00:00:00Z', draft: true })
       )
-      vi.mocked(fs.writeFile).mockImplementation((path, content, callback) => {
-        callback(null)
-      })
+      vi.mocked(writeFile).mockResolvedValue()
 
       await openEditor()
 
@@ -100,10 +95,10 @@ describe('new-post', () => {
         message: 'Save post "untitled"?',
         default: true
       }))
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining('2023-01-01_untitled.md'),
         mockPostContent,
-        expect.any(Function)
+        'utf8'
       )
     })
 
@@ -112,21 +107,19 @@ describe('new-post', () => {
       const mockPostContent = '---\ntitle: Test Post\ndate: \ndraft: true\n---\nContent'
 
       vi.mocked(loadConfig).mockResolvedValue(mockConfig)
-      vi.mocked(editor).mockResolvedValue(mockPostContent)
+      vi.mocked(openInEditor).mockResolvedValue(mockPostContent)
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(matter).mockReturnValue(
         mockMatterFile({ title: 'Test Post', date: undefined, draft: true })
       )
-      vi.mocked(fs.writeFile).mockImplementation((path, content, callback) => {
-        callback(null)
-      })
+      vi.mocked(writeFile).mockResolvedValue()
 
       await openEditor('Test Post')
 
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(writeFile).toHaveBeenCalledWith(
         expect.stringMatching(/^\/test\/blog\/build\/posts\/\d{4}-\d{2}-\d{2}_test-post\.md$/),
         mockPostContent,
-        expect.any(Function)
+        'utf8'
       )
     })
 
@@ -135,21 +128,19 @@ describe('new-post', () => {
       const mockPostContent = '---\ntitle: Test Post! @#$%^&*()\ndate: 2023-01-01T00:00:00Z\ndraft: true\n---\nContent'
 
       vi.mocked(loadConfig).mockResolvedValue(mockConfig)
-      vi.mocked(editor).mockResolvedValue(mockPostContent)
+      vi.mocked(openInEditor).mockResolvedValue(mockPostContent)
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(matter).mockReturnValue(
         mockMatterFile({ title: 'Test Post! @#$%^&*()', date: '2023-01-01T00:00:00Z', draft: true })
       )
-      vi.mocked(fs.writeFile).mockImplementation((path, content, callback) => {
-        callback(null)
-      })
+      vi.mocked(writeFile).mockResolvedValue()
 
       await openEditor()
 
-      expect(fs.writeFile).toHaveBeenCalledWith(
+      expect(writeFile).toHaveBeenCalledWith(
         expect.stringContaining('2023-01-01_test-post-.md'),
         mockPostContent,
-        expect.any(Function)
+        'utf8'
       )
     })
   })

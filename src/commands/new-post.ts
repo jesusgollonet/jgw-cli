@@ -1,10 +1,11 @@
 #!/usr/bin/env bun
 
-import editor from "@inquirer/editor";
 import confirm from "@inquirer/confirm";
-import fs from "fs";
+import { writeFile } from "fs/promises";
 import matter from "gray-matter";
+import path from "path";
 import { loadConfig } from "../config";
+import { openInEditor } from "../lib/editor";
 
 const postMetadata = (postName: string, postDate: string) => {
   return `---
@@ -17,11 +18,10 @@ draft: true
 export const openEditor = async (postTitle?: string) => {
   const config = await loadConfig();
   const postsDirectory = `${config.path}/build/posts/`;
-  const postContent = await editor({
-    message: "Create a new post",
-    default: postMetadata(postTitle || "untitled", new Date().toISOString()),
-    postfix: ".md",
-  });
+  const postContent = await openInEditor(
+    postMetadata(postTitle || "untitled", new Date().toISOString()),
+    ".md",
+  );
   const parsedPost = matter(postContent);
   // TODO: validate post
   const { title, date } = parsedPost.data;
@@ -52,10 +52,8 @@ export const openEditor = async (postTitle?: string) => {
   // check for defaults
   // save post now
   //
-  const filePath = `${postsDirectory}${postFilename}`;
+  const filePath = path.join(postsDirectory, postFilename);
   //TODO: check for name collision
-  fs.writeFile(filePath, postContent, (err) => {
-    if (err) throw err;
-    console.log("The post has been saved! as ", filePath);
-  });
+  await writeFile(filePath, postContent, "utf8");
+  console.log("The post has been saved! as ", filePath);
 };

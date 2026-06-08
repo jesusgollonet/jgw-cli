@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 
 import select from "@inquirer/select";
-import editor from "@inquirer/editor";
 import confirm from "@inquirer/confirm";
 import { writeFile } from "fs/promises";
 import { getPosts, getPostByIndex } from "./list-posts";
+import { openInEditor } from "../lib/editor";
 
 interface PostChoice {
   name: string;
@@ -58,11 +58,7 @@ export async function editPost(includeDrafts: boolean = false) {
     return;
   }
 
-  const editedContent = await editor({
-    message: `Edit post: ${postToEdit.title}`,
-    default: postToEdit.content,
-    postfix: ".md",
-  });
+  const editedContent = await openInEditor(postToEdit.content, ".md");
 
   if (editedContent === postToEdit.content) {
     console.log("No changes made.");

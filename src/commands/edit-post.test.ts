@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { editPost } from './edit-post'
 import { getPosts, getPostByIndex } from './list-posts'
 import select from '@inquirer/select'
-import editor from '@inquirer/editor'
+import { openInEditor } from '../lib/editor'
 import confirm from '@inquirer/confirm'
 import fs from 'fs/promises'
 
 // Mock dependencies
 vi.mock('./list-posts')
 vi.mock('@inquirer/select')
-vi.mock('@inquirer/editor')
+vi.mock('../lib/editor')
 vi.mock('@inquirer/confirm')
 vi.mock('fs/promises')
 
@@ -91,7 +91,7 @@ describe('edit-post', () => {
       await editPost()
 
       expect(console.log).toHaveBeenCalledWith('Error: Could not load the selected post.')
-      expect(editor).not.toHaveBeenCalled()
+      expect(openInEditor).not.toHaveBeenCalled()
     })
 
     it('should open editor with existing content when post is selected', async () => {
@@ -107,17 +107,16 @@ describe('edit-post', () => {
       vi.mocked(getPosts).mockResolvedValue(mockPosts)
       vi.mocked(select).mockResolvedValue(0)
       vi.mocked(getPostByIndex).mockResolvedValue(mockPostWithContent)
-      vi.mocked(editor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
+      vi.mocked(openInEditor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(fs.writeFile).mockResolvedValue()
 
       await editPost()
 
-      expect(editor).toHaveBeenCalledWith(expect.objectContaining({
-        message: 'Edit post: First Post',
-        default: '---\ntitle: First Post\n---\nContent',
-        postfix: '.md'
-      }))
+      expect(openInEditor).toHaveBeenCalledWith(
+        '---\ntitle: First Post\n---\nContent',
+        '.md'
+      )
     })
 
     it('should handle no changes made to content', async () => {
@@ -133,7 +132,7 @@ describe('edit-post', () => {
       vi.mocked(getPosts).mockResolvedValue(mockPosts)
       vi.mocked(select).mockResolvedValue(0)
       vi.mocked(getPostByIndex).mockResolvedValue(mockPostWithContent)
-      vi.mocked(editor).mockResolvedValue('---\ntitle: First Post\n---\nContent')
+      vi.mocked(openInEditor).mockResolvedValue('---\ntitle: First Post\n---\nContent')
 
       await editPost()
 
@@ -155,7 +154,7 @@ describe('edit-post', () => {
       vi.mocked(getPosts).mockResolvedValue(mockPosts)
       vi.mocked(select).mockResolvedValue(0)
       vi.mocked(getPostByIndex).mockResolvedValue(mockPostWithContent)
-      vi.mocked(editor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
+      vi.mocked(openInEditor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(fs.writeFile).mockResolvedValue()
 
@@ -186,7 +185,7 @@ describe('edit-post', () => {
       vi.mocked(getPosts).mockResolvedValue(mockPosts)
       vi.mocked(select).mockResolvedValue(0)
       vi.mocked(getPostByIndex).mockResolvedValue(mockPostWithContent)
-      vi.mocked(editor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
+      vi.mocked(openInEditor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
       vi.mocked(confirm).mockResolvedValue(false)
 
       await editPost()
@@ -208,7 +207,7 @@ describe('edit-post', () => {
       vi.mocked(getPosts).mockResolvedValue(mockPosts)
       vi.mocked(select).mockResolvedValue(0)
       vi.mocked(getPostByIndex).mockResolvedValue(mockPostWithContent)
-      vi.mocked(editor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
+      vi.mocked(openInEditor).mockResolvedValue('---\ntitle: First Post\n---\nUpdated content')
       vi.mocked(confirm).mockResolvedValue(true)
       vi.mocked(fs.writeFile).mockRejectedValue(new Error('Write failed'))
 

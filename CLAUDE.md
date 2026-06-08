@@ -59,7 +59,7 @@ bun run dev post edit --all
 ### Key Dependencies
 - **Bun** - JavaScript runtime with native TypeScript support
 - **yargs** - CLI argument parsing and command structure
-- **@inquirer/editor** - Interactive editor for post creation
+- **$VISUAL/$EDITOR** - External editor used for post creation and editing
 - **gray-matter** - Frontmatter parsing for markdown files
 - **TypeScript** - Primary language with strict mode enabled
 
